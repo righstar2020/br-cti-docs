@@ -15,17 +15,17 @@
 ### 1.1 平台整体架构
 
 ![客户端整体架构](imgs/client_framework.png)
-<center>图1.客户端整体架构</center>
+
 
 <br>
 
 ![平台整体架构](imgs/platform_framework.png)
-<center>图2.平台整体架构</center>
+
 
 <br>
 
 ![智能合约架构](imgs/smartcontract_framework.png)
-<center>图3.智能合约架构</center>
+
 
 <br>
 
@@ -33,13 +33,12 @@
 
 ![平台业务架构1](imgs/business_framework_1.png)
 
-<center>图4.平台业务架构1</center>
+
 
 <br>
 
 ![平台业务架构2](imgs/business_framework_2.png)
 
-<center>图5.平台业务架构2</center>
 
 ## 2. client 端
 

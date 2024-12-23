@@ -1,0 +1,10 @@
+{
+    "plugins": ["chapter-fold","image-captions"],
+    "pluginsConfig": {
+      "image-captions": {
+          "caption": "图_PAGE_IMAGE_NUMBER_._CAPTION_",
+          "align": "center"
+      }
+      
+    }
+}
