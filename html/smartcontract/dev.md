@@ -1,17 +1,17 @@
-# 智能合约开发说明
-## 1.说明
+# 链码开发说明
+## 说明
 使用fabric 2.2.0 链码SDK
 没有使用最新的版本
 编译请在fabric-contract文件夹下进行
 
-## 2.依赖说明
+## 依赖说明
 go 依赖以太坊加密库1.9.25
 ```shell
 go get github.com/ethereum/go-ethereum/crypto@v1.9.25
 ```
 
-## 3.链代码
-### 3.1 环境启动
+## 链代码
+### 环境启动
 可参考fabric-sample内教程
 启动环境并选择couchdb数据库
 1.进入fabric-sample/test-network文件夹
@@ -26,7 +26,7 @@ cd ~/go/src/github.com/hyperledger/fabric-samples/test-network
 ```shell
 ./network.sh up createChannel -s couchdb
 ```
-### 3.2 合约部署
+### 合约部署
 4.部署合约(每次更改都需要重启环境)
 ```shell
 ./network.sh deployCC -ccn main_contract -ccp ../br-cti-smartcontract/fabric-contract -ccl go
@@ -55,7 +55,7 @@ export TARGET_TLS_OPTIONS="-o localhost:7050 --ordererTLSHostnameOverride ordere
 peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n main_contract --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" -c '{"function":"InitLedger","Args":[]}'
 ```
 
-### 3.3 链码执行
+### 链码执行
 6.环境变量(证书)配置
 ```shell
 export PATH=${PWD}/../bin:$PATH
@@ -157,4 +157,34 @@ peer chaincode query $TARGET_TLS_OPTIONS -C mychannel -n main_contract -c '{"fun
 peer chaincode invoke $TARGET_TLS_OPTIONS -C mychannel -n main_contract -c '{"function":"RegisterCTIInfo","Args":["情报信息JSON"]}'
 //注册用户信息
 peer chaincode invoke $TARGET_TLS_OPTIONS -C mychannel -n main_contract -c '{"function":"RegisterUserInfo","Args":["用户信息JSON"]}'
+```
+
+10.链码升级
+```shell
+//打包
+peer lifecycle chaincode package main_contract_new.tar.gz --path ../br-cti-smartcontract/fabric-contract  --lang golang --label main_contract_2.0
+
+//切换节点证书
+source ./peer_org1.sh
+source ./peer_org2.sh
+
+peer lifecycle chaincode install main_contract_new.tar.gz //安装需要切换节点证书
+
+peer lifecycle chaincode queryinstalled
+
+//安装后新的链码id
+export NEW_CC_PACKAGE_ID=main_contract_2.0:e95164645a2d13595c6d0b7f2f20d191dd9af1ac7923c3c5ac081576ba52e812
+
+
+//审批也需要切换节点证书
+peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name main_contract --version 2.0 --package-id $NEW_CC_PACKAGE_ID --sequence 2 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+
+peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name  main_contract --version 2.0 --sequence 2 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt"
+
+
+docker ps -a 查看是否更新
+
+每次更新sequence需要+1
+
+
 ```
